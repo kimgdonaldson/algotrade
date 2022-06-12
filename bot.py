@@ -3,8 +3,10 @@ from binance.client import Client
 from binance import ThreadedWebsocketManager
 import datetime as dt
 import sys
-from config import api_key, api_secret
 from pprint import pprint
+import config
+import ccxt
+import ta
 
 # Messages are received as a dictionary with this structure
 # Kline information
@@ -30,28 +32,28 @@ from pprint import pprint
 #    "Q": "0.500",   // Taker buy quote asset volume
 #    "B": "123456"   // Ignore
 
-closes = []
-candles = []
-green_candles = []
-red_candles = []
-prev_color = ''
-consecutive_g = 1
-consecutive_r = 1
-in_position = False
-max_trades = 9
-num_trades = 0
-position_price = 0
-
 class Bot:
     """ Basic Bot Object """
     def __init__(self, symbol, interval):
         self.symbol = symbol
         self.interval = interval
-        self.api_key = api_key
-        self.api_secret = api_secret
-        self.client = Client(api_key, api_secret, tld = 'us')
+        self.api_key = config.BINANCEUS_KEY
+        self.api_secret = config.BINANCEUS_SECRET
+        self.client = Client(self.api_key, self.api_secret, tld = 'us')
         self.price = 0
-
+        self.closes = []
+        self.candles = []
+        self.green_canles = []
+        self.red_candles = []
+        self.prev_color = ''
+        self.consecutive_g = 1
+        self.consecutive_r = 1
+        self.in_position = False
+        self.position = {
+            "symbol": '',
+            "shares": 0,
+            "entry_price": 0
+        }
     def open_socket(self):
         # Establush a socket with Binance API
         self.twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret)
@@ -83,32 +85,22 @@ class Bot:
         for n in smas:
             sma_name = 'sma_' + str(n)
             self.kline_history[sma_name] = self.kline_history.iloc[:,1].rolling(window = mult * n).mean()
+
+        # Add 24 hr highs and lows
+
         print("Retreived {:,} records.".format(len(self.kline_history)))
 
     def handle_socket_msg(self, msg):
         """ Callback function when a message is received from Binance """
 
-        global closes
-        global candles
-        global green_candles
-        global red_candles
-        global prev_color
-        global consecutive_g
-        global consecutive_r
-        global in_position
-        global max_trades
-        global num_trades
-        global position_price
-
         candle = msg['k']
-        self.price = candle['c']
-
-        if(candle['x']):
-            candles.append(candle)
+        self.price = float(candle['c'])
+        if(candle['x']): # candle is closed
+            self.candles.append(candle)
             open_price = float(candle['o'])
             close_price = float(candle['c'])
             poc = (close_price - open_price) / open_price * 100
-
+            print("{} candle closed".format(self.interval))
             print("Open Price: ${:,.2f}".format(open_price))
             print("Close Price: ${:,.2f}".format(close_price))
             print("Percent Change: {}%".format(round(poc, 4)))
@@ -123,6 +115,10 @@ class Bot:
 
     def stop(self):
         self.twm.stop()
+
+    def save_kline_history(self):
+        csv_file = self.symbol.lower() + '.csv'
+        self.kline_history.to_csv(csv_file)
 
     def save(self):
         pass

@@ -1,0 +1,60 @@
+---
+title: "TA Analysis"
+author: "Kim Donaldson"
+date: "6/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(plotly)
+```
+
+
+## Exploring Historical Closes
+
+Download the dataset
+
+```{r}
+btc <- read_csv('https://raw.githubusercontent.com/kimgdonaldson/algotrade/main/btc-06-12-22.csv')
+```
+
+
+## Normalize closing price and TA indicators to range (0,1) and remove NA's
+
+```{r}
+btc <- btc %>% drop_na()
+btc_normal <- btc %>% mutate(normal_close = (close - min(close)) / (max(close) - min(close)),
+                             normal_rsi = (rsi - min(rsi)) / (max(rsi) - min(rsi)),
+                             normal_macd = (macd - min(macd)) / (max(macd) - min(macd)),
+                             normal_signal = (stoch_signal - min(stoch_signal)) /  (max(stoch_signal) - min(stoch_signal)),
+                             normal_stoch_rsi = (stoch_rsi - min(stoch_rsi)) / max(stoch_rsi) - min(stoch_rsi))
+```
+
+## Plotting the relationship between Closing Price and MACD
+
+```{r}
+fig <- btc_normal %>% plot_ly(x = ~timestamp, y = ~normal_close, type='scatter', name='Normal Close') %>%
+  add_trace(y = ~normal_macd, type='scatter', name='Normal MACD') %>%
+  layout(title="Normal Close Price vs. Normal MACD", 
+         xaxis=list(title="Time"), yaxis=list(title="Normalized MACD"))
+fig
+```
+
+
+## Plotting the relationship between Closing Price and RSI 
+
+```{r}
+fig <- btc_normal %>% plot_ly(x = ~timestamp, y = ~normal_close, type='scatter', name='Normal Close') %>%
+  add_trace(y = ~normal_rsi, type='scatter', name='Normal RSI') %>% 
+    layout(title="Normal Close Price vs. Normal RSI", 
+         xaxis=list(title="Time"), yaxis=list(title="Normalized RSI"))
+fig
+```
+
+

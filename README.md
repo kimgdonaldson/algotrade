@@ -10,10 +10,10 @@ api_key = 'your api key'
 api_secret = 'your api secret'
 
 To create a bot from python console try:
->>> from bot import *
->>> btc = Bot('BTCUSDT', '1h') 
->>> btc.open_socket()
->>> btc.get_historical()
+* from bot import *
+* btc = Bot('BTCUSDT', '1h') 
+* btc.open_socket()
+* btc.get_historical()
 
 Once you run get_historical your bot will now have pandas dataframe with historical data including SMA's 
 
@@ -28,8 +28,8 @@ bot_ccxt.py uses the ccxt and ta libraries to connect to an exchange and provide
 At present I'm using this script to generate historical data and add TA indicators for analaysis. 
 To use this script add your api keys to config.py 
 
->>> from bot_ccxt import *
->>> bot = Bot('BTCUSDT')
->>> bot.get_history()
+* from bot_ccxt import *
+* bot = Bot('BTCUSDT')
+* bot.get_history()
 
 That's it. That will generate a pandas dataframe with the last 365 days of closing price along with TA indicators

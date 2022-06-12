@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
 ```
 
 
@@ -41,7 +42,7 @@ btc_normal <- btc %>% mutate(normal_close = (close - min(close)) / (max(close) -
 ```{r}
 fig <- btc_normal %>% plot_ly(x = ~timestamp, y = ~normal_close, type='scatter', name='Normal Close') %>%
   add_trace(y = ~normal_macd, type='scatter', name='Normal MACD') %>%
-  layout(title="Normal Close Price vs. Normal MACD", 
+  layout(title="Bitcoin Normal Close Price vs. Normal MACD", 
          xaxis=list(title="Time"), yaxis=list(title="Normalized MACD"))
 fig
 ```
@@ -52,7 +53,7 @@ fig
 ```{r}
 fig <- btc_normal %>% plot_ly(x = ~timestamp, y = ~normal_close, type='scatter', name='Normal Close') %>%
   add_trace(y = ~normal_rsi, type='scatter', name='Normal RSI') %>% 
-    layout(title="Normal Close Price vs. Normal RSI", 
+    layout(title="Bitcoin Normal Close Price vs. Normal RSI", 
          xaxis=list(title="Time"), yaxis=list(title="Normalized RSI"))
 fig
 ```
